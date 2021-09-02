@@ -1,6 +1,8 @@
 package cliio
 
-import "os"
+import (
+	"os"
+)
 
 // bellSkipper implements an io.WriteCloser that skips the terminal bell
 // character (ASCII code 7), and writes the rest to os.Stderr. It is used to

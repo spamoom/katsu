@@ -9,24 +9,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	awsCmd "github.com/netsells/katsu/cmd/aws"
+	dockerCmd "github.com/netsells/katsu/cmd/docker"
 )
 
 var envPrefix = "KATSU"
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "katsu",
-	Short: fmt.Sprintf("%s\n\nEasily manage apps and infrastructure", Logo()),
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-
-		// Run init config on every command so we can do ENV fallbacks
-		initConfig(cmd)
-
-		cliio.ConfigureLogLevel(cmd)
-
-		return nil
-	},
-}
 
 func Logo() string {
 	myFigure := figure.NewFigure("Katsu", "doom", true)
@@ -37,23 +25,39 @@ func Logo() string {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
-}
+	cmd := &cobra.Command{
+		Use:   "katsu",
+		Short: fmt.Sprintf("%s\n\nEasily manage apps and infrastructure", Logo()),
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-func init() {
-	rootCmd.PersistentFlags().IntP("verbosity", "v", 0, "Print verbose logs (0-3)")
+			// Run init config on every command so we can do ENV fallbacks
+			initConfig(cmd)
+
+			cliio.ConfigureLogLevel(cmd)
+
+			return nil
+		},
+	}
+
+	cmd.PersistentFlags().IntP("verbosity", "v", 0, "Print verbose logs (0-3)")
+
+	cmd.AddCommand(awsCmd.NewCmdAws())
+	cmd.AddCommand(dockerCmd.NewCmdDocker())
+
+	cobra.CheckErr(cmd.Execute())
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig(cmd *cobra.Command) {
 	viper.SetEnvPrefix(envPrefix)
 
+	// Pull in the config file for the particular project
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
 	viper.SetConfigName(".katsu.yml")
+	viper.ReadInConfig()
 
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
 
 	bindFlags(cmd, viper.GetViper())
 }
