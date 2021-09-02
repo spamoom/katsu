@@ -4,8 +4,6 @@ import (
 	"os"
 
 	"github.com/netsells/katsu/helpers"
-	"github.com/netsells/katsu/helpers/aws"
-	"github.com/netsells/katsu/helpers/aws/ecr"
 	"github.com/netsells/katsu/helpers/cliio"
 	"github.com/netsells/katsu/helpers/config"
 	"github.com/netsells/katsu/helpers/docker"
@@ -24,8 +22,6 @@ func NewCmdBuild() *cobra.Command {
 		Short: "Builds docker-compose ready for prod",
 		Run:   runDockerBuildCmd,
 	}
-
-	aws.RegisterCommonFlags(cmd)
 
 	cmd.Flags().String("tag", helpers.GetCurrentSha(), "The tag that should be built with the images. Defaults to the current commit SHA")
 	cmd.Flags().String("tag-prefix", "", "The tag prefix that should be built with the images. Defaults to null")
@@ -48,11 +44,6 @@ func runDockerBuildCmd(cmd *cobra.Command, args []string) {
 
 	prefixedTag := docker.DockerPrefixedTag()
 	services := config.GetDockerServices()
-
-	err := ecr.AuthenticateDocker()
-	if err != nil {
-		cliio.FatalStep(err.Error())
-	}
 
 	if len(services) == 0 {
 		cliio.Stepf("Building docker images for all services with tag %s", prefixedTag)

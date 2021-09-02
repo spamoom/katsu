@@ -41,28 +41,28 @@ func GetDockerServices() []string {
 func getString(flag string, filePath string, defaultValue string) string {
 	v := viper.GetViper()
 
-	cliio.LogDebugf("Fetching config for flag %s", flag)
+	cliio.LogVerbosef("Fetching config for flag %s", flag)
 
 	// Try from cli argument
 	value, _ := helpers.GetCmd().Flags().GetString(flag)
 
 	if value != "" {
-		cliio.LogDebugf("Got value for flag %s - %s", flag, value)
+		cliio.LogVerbosef("Got value for flag %s - %s", flag, value)
 		return value
 	}
 
 	if filePath != "" {
-		cliio.LogDebugf("Now trying the katsu file in path %s", filePath)
+		cliio.LogVerbosef("Now trying the katsu file in path %s", filePath)
 
 		pathValue := v.GetString(filePath)
 
 		if pathValue != "" {
-			cliio.LogDebugf("Got %s from file path %s", pathValue, filePath)
+			cliio.LogVerbosef("Got %s from file path %s", pathValue, filePath)
 			return pathValue
 		}
 	}
 
-	cliio.LogDebugf("Unable to get value from flag or katsu file, falling back to default: %s", defaultValue)
+	cliio.LogVerbosef("Unable to get value from flag or katsu file, falling back to default: %s", defaultValue)
 
 	return defaultValue
 }

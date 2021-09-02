@@ -33,13 +33,13 @@ func Execute() {
 			// Run init config on every command so we can do ENV fallbacks
 			initConfig(cmd)
 
-			cliio.ConfigureLogLevel(cmd)
+			cliio.LogVerboseEnabled, _ = cmd.Flags().GetBool("verbose")
 
 			return nil
 		},
 	}
 
-	cmd.PersistentFlags().IntP("verbosity", "v", 0, "Print verbose logs (0-3)")
+	cmd.PersistentFlags().BoolP("verbose", "v", false, "Print verbose logs")
 
 	cmd.AddCommand(awsCmd.NewCmdAws())
 	cmd.AddCommand(dockerCmd.NewCmdDocker())

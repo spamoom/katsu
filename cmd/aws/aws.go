@@ -14,6 +14,11 @@ func NewCmdAws() *cobra.Command {
 		Long:  "Work with AWS",
 	}
 
+	// These will persist through all the aws sub-commands
+	cmd.PersistentFlags().String("aws-region", "", "Override the default AWS region")
+	cmd.PersistentFlags().String("aws-account-id", "", "Override the default AWS account ID")
+	cmd.PersistentFlags().String("aws-profile", "", "Override the AWS profile to use")
+
 	cmd.AddCommand(cmdAssumeRole.NewCmdAssumeRole())
 	cmd.AddCommand(cmdDocker.NewCmdDocker())
 

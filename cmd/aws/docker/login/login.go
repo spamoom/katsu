@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/netsells/katsu/helpers"
-	"github.com/netsells/katsu/helpers/aws"
 	"github.com/netsells/katsu/helpers/aws/ecr"
 	"github.com/netsells/katsu/helpers/cliio"
 	"github.com/spf13/cobra"
@@ -16,8 +15,6 @@ func NewCmdLogin() *cobra.Command {
 		Short: "Logs into docker via the AWS account",
 		Run:   runDockerLoginCmd,
 	}
-
-	aws.RegisterCommonFlags(cmd)
 
 	return cmd
 }

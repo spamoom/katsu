@@ -8,7 +8,6 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/netsells/katsu/helpers"
-	"github.com/netsells/katsu/helpers/aws"
 	"github.com/netsells/katsu/helpers/aws/s3"
 	"github.com/netsells/katsu/helpers/cliio"
 	"github.com/spf13/cobra"
@@ -31,8 +30,6 @@ func NewCmdAssumeRole() *cobra.Command {
 		Short: "Allows you to enter a cli as another role",
 		Run:   runAssumeRoleCmd,
 	}
-
-	aws.RegisterCommonFlags(cmd)
 
 	return cmd
 }
