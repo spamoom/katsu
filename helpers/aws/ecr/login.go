@@ -17,6 +17,11 @@ import (
 
 func AuthenticateDocker() error {
 	token, err := getLoginToken()
+
+	if err != nil {
+		return err
+	}
+
 	username, password := loginTokenToUserPassword(token)
 
 	if err != nil {

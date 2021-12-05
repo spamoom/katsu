@@ -3,7 +3,7 @@ module github.com/netsells/katsu
 go 1.17
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.8.1
+	github.com/aws/aws-sdk-go-v2 v1.11.2
 	github.com/aws/aws-sdk-go-v2/config v1.6.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.4.3
 	github.com/fatih/color v1.12.0
@@ -16,14 +16,17 @@ require (
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.3.3 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.4.1 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.2.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/iam v1.13.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.2.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.2.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.5.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.13.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.3.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.6.2 // indirect
-	github.com/aws/smithy-go v1.7.0 // indirect
+	github.com/aws/smithy-go v1.9.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/fsnotify/fsnotify v1.5.0 // indirect
