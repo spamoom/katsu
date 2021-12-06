@@ -38,6 +38,10 @@ func GetDockerServices() []string {
 	return getStringArray("services", "docker.services")
 }
 
+func GetS3Bucket() string {
+	return getString("s3-bucket", "", "")
+}
+
 func getString(flag string, filePath string, defaultValue string) string {
 	v := viper.GetViper()
 

@@ -69,8 +69,8 @@ func AskStep(question DefaultQuestion) {
 	ask(question, formatStepOutput(question.Question, color.FgYellow))
 }
 
-func ConfirmStep(question DefaultQuestion) {
-	confirm(question, formatStepOutput(question.Question, color.FgYellow))
+func ConfirmStep(question DefaultQuestion) (string, error) {
+	return confirm(question, formatStepOutput(question.Question, color.FgYellow))
 }
 
 func ask(question DefaultQuestion, text string) (string, error) {
@@ -82,7 +82,6 @@ func ask(question DefaultQuestion, text string) (string, error) {
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
 		return "", err
 	}
 
@@ -99,7 +98,6 @@ func confirm(question DefaultQuestion, text string) (string, error) {
 	result, err := prompt.Run()
 
 	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
 		return "", err
 	}
 

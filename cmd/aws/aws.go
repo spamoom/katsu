@@ -3,6 +3,7 @@ package aws
 import (
 	cmdAssumeRole "github.com/netsells/katsu/cmd/aws/assume-role"
 	cmdDocker "github.com/netsells/katsu/cmd/aws/docker"
+	cmdEcs "github.com/netsells/katsu/cmd/aws/ecs"
 	"github.com/spf13/cobra"
 	// https://pkg.go.dev/github.com/MakeNowJust/heredoc
 )
@@ -21,6 +22,7 @@ func NewCmdAws() *cobra.Command {
 
 	cmd.AddCommand(cmdAssumeRole.NewCmdAssumeRole())
 	cmd.AddCommand(cmdDocker.NewCmdDocker())
+	cmd.AddCommand(cmdEcs.NewCmdEcs())
 
 	return cmd
 }

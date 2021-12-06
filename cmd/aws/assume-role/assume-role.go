@@ -255,6 +255,7 @@ func getAccountPrompt(accounts []Account) promptui.Select {
 		Active:   "\U000027A1 {{ .Name | blue }}",
 		Inactive: "  {{ .Name | white }}",
 		Selected: fmt.Sprintf("%s Account: {{ .Name | faint }}", promptui.IconGood),
+		// Searcher: https://github.com/manifoldco/promptui/blob/master/_examples/custom_select/main.go#L42
 		Details: `
 --------- Account ----------
 {{ "Name:" | faint }}	{{ .Name }}
