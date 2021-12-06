@@ -119,8 +119,6 @@ func runManageEnvCmd(cmd *cobra.Command, args []string) {
 			cliio.FatalStepf("Failed to get new file name")
 		}
 
-		fmt.Println(newName)
-
 		cmd := exec.Command("nano", tempFile.Name())
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
