@@ -65,8 +65,8 @@ func Lines(lines []string) {
 	}
 }
 
-func AskStep(question DefaultQuestion) {
-	ask(question, formatStepOutput(question.Question, color.FgYellow))
+func AskStep(question DefaultQuestion) (string, error) {
+	return ask(question, formatStepOutput(question.Question, color.FgYellow))
 }
 
 func ConfirmStep(question DefaultQuestion) (string, error) {

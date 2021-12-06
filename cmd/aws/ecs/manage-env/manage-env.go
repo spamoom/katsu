@@ -50,20 +50,20 @@ func runManageEnvCmd(cmd *cobra.Command, args []string) {
 
 	files := getFile(bucketName)
 
+	tempFile, err := ioutil.TempFile("", "katsu-env")
+
+	if err != nil {
+		cliio.FatalStepf("Failed to write temp file")
+	}
+
+	defer os.Remove(tempFile.Name())
+
 	if files.Action == "" {
 		fileContents, err := s3.GetFile(bucketName, *files.File)
 
 		if err != nil {
 			cliio.FatalStepf("Failed to get file contents: %s", err)
 		}
-
-		tempFile, err := ioutil.TempFile("", "katsu-env")
-
-		if err != nil {
-			cliio.FatalStepf("Failed to write temp file")
-		}
-
-		defer os.Remove(tempFile.Name())
 
 		bodyBytes, _ := ioutil.ReadAll(fileContents.Body)
 		err = os.WriteFile(tempFile.Name(), bodyBytes, 0644)
@@ -81,6 +81,12 @@ func runManageEnvCmd(cmd *cobra.Command, args []string) {
 		newBodyBytes, _ := ioutil.ReadFile(tempFile.Name())
 
 		edits := myers.ComputeEdits(span.URIFromPath("a.txt"), string(bodyBytes), string(newBodyBytes))
+
+		if len(edits) == 0 {
+			cliio.WarnStep("No changes")
+			os.Exit(0)
+		}
+
 		diff := gotextdiff.ToUnified("old env", "new env", string(bodyBytes), edits)
 
 		cliio.PrintDiff(diff)
@@ -104,7 +110,33 @@ func runManageEnvCmd(cmd *cobra.Command, args []string) {
 		cliio.WarnStep("Changes not committed")
 		os.Exit(0)
 	} else {
-		cliio.FatalStep("Not implemented")
+		newName, err := cliio.AskStep(cliio.DefaultQuestion{
+			Question: "Enter a name for the new file",
+			Default:  "",
+		})
+
+		if err != nil {
+			cliio.FatalStepf("Failed to get new file name")
+		}
+
+		fmt.Println(newName)
+
+		cmd := exec.Command("nano", tempFile.Name())
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		_ = cmd.Run()
+
+		newBodyBytes, _ := ioutil.ReadFile(tempFile.Name())
+
+		err = s3.PutFile(bucketName, newName, newBodyBytes)
+
+		if err != nil {
+			cliio.FatalStepf("Failed to create file: %s", err)
+		}
+
+		cliio.SuccessfulStep("Successfully created file")
+		os.Exit(0)
 	}
 
 	os.Exit(0)
