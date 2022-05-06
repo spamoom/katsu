@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/netsells/katsu/helpers"
 	"github.com/netsells/katsu/helpers/cliio"
@@ -11,19 +12,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CallBuildContext struct {
-	Tag         string
+type CallPushContext struct {
+	Tags        []string
 	Service     string
 	Services    []string
 	Environment config.ConfigEnvironment
 }
 
-func NewCmdBuild() *cobra.Command {
+func NewCmdPush() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "build",
-		Short: "Builds docker-compose ready for an environment",
-		Run:   runDockerBuildCmd,
+		Use:   "push",
+		Short: "Pushes built images to an environment",
+		Run:   runDockerPushCmd,
 	}
+
+	cmd.Flags().Bool("skip-additional-tags", false, "Skips the latest and environment tags")
 
 	cmd.Flags().String("tag", helpers.GetCurrentSha(), "The tag that should be built with the images. Defaults to the current commit SHA")
 	cmd.Flags().String("tag-prefix", "", "The tag prefix that should be built with the images. Defaults to null")
@@ -33,7 +36,7 @@ func NewCmdBuild() *cobra.Command {
 	return cmd
 }
 
-func runDockerBuildCmd(cmd *cobra.Command, args []string) {
+func runDockerPushCmd(cmd *cobra.Command, args []string) {
 	helpers.SetCmd(cmd)
 
 	if config.GetTag() == "" {
@@ -50,14 +53,16 @@ func runDockerBuildCmd(cmd *cobra.Command, args []string) {
 		cliio.FatalStepf("Unable to get environment, please ensure it is setup in .katsu.yml")
 	}
 
-	prefixedTag := docker.DockerPrefixedTag()
 	services := config.GetDockerServices()
 
-	if len(services) == 0 {
-		cliio.Stepf("Building docker images for all services with tag %s", prefixedTag)
+	skipAdditonalTags, _ := cmd.Flags().GetBool("skip-additional-tags")
+	tags := docker.DetermineTags(skipAdditonalTags)
 
-		success := callBuild(CallBuildContext{
-			Tag:         prefixedTag,
+	if len(services) == 0 {
+		cliio.Stepf("Pushing docker images for all services with tags %s", strings.Join(tags, ", "))
+
+		success := callPush(CallPushContext{
+			Tags:        tags,
 			Environment: *environment,
 			Services:    services,
 		})
@@ -70,11 +75,11 @@ func runDockerBuildCmd(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	cliio.Stepf("Building docker images for services with tag %s: %v", prefixedTag, services)
+	cliio.Stepf("Pushing docker images for services with tags %s: %s", strings.Join(tags, ", "), strings.Join(services, ", "))
 
 	for _, service := range services {
-		success := callBuild(CallBuildContext{
-			Tag:         prefixedTag,
+		success := callPush(CallPushContext{
+			Tags:        tags,
 			Service:     service,
 			Environment: *environment,
 			Services:    services,
@@ -85,32 +90,40 @@ func runDockerBuildCmd(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	cliio.SuccessfulStep("Docker images built.")
+	cliio.SuccessfulStep("All images pushed.")
 	os.Exit(0)
 }
 
-func callBuild(context CallBuildContext) bool {
-	parts := []string{
-		"-f", "docker-compose.yml",
-		"-f", "docker-compose.build.yml",
-		"build", "--no-cache",
-	}
+func callPush(context CallPushContext) bool {
 
-	if context.Service != "" {
-		parts = append(parts, context.Service)
-	}
+	// Need to make the new tags first
+	docker.TagImages(context.Tags, &context.Service)
 
-	process := process.NewProcess("docker-compose", parts...)
-	process.SetEnv("TAG", context.Tag)
+	for _, tag := range context.Tags {
+		parts := []string{
+			"-f", "docker-compose.yml",
+			"-f", "docker-compose.build.yml",
+			"push",
+		}
 
-	docker.AppendEnvImageReposForServices(process, context.Services)
+		if context.Service != "" {
+			parts = append(parts, context.Service)
+		}
 
-	process.EchoLineByLine = true
-	_, err := process.Run()
+		process := process.NewProcess("docker-compose", parts...)
+		process.SetEnv("TAG", tag)
 
-	if err != nil {
-		cliio.ErrorStep("Unable to build all images, check the above output for reasons why.")
-		return false
+		docker.AppendEnvImageReposForServices(process, context.Services)
+
+		process.EchoLineByLine = false
+		_, err := process.Run()
+
+		if err != nil {
+			cliio.ErrorStepf("Unable to push tag %s for service %s, check the above output for reasons why.", tag, context.Service)
+			return false
+		} else {
+			cliio.SuccessfulStepf("Pushed %s image with %s tag", context.Service, tag)
+		}
 	}
 
 	return true

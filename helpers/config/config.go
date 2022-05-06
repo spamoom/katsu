@@ -1,10 +1,37 @@
 package config
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/mitchellh/mapstructure"
 	"github.com/netsells/katsu/helpers"
 	"github.com/netsells/katsu/helpers/cliio"
 	"github.com/spf13/viper"
 )
+
+type ConfigEnvironment struct {
+	Name string
+	Aws  ConfigEnvironmentAws
+}
+
+type ConfigEnvironmentAws struct {
+	Name      string
+	Region    string
+	AccountId int `mapstructure:"account-id"`
+	Ecs       ConfigEnvironmentAwsEcs
+}
+
+type ConfigEnvironmentAwsEcs struct {
+	TaskDefinition string `mapstructure:"task-definition"`
+	Service        string
+	Services       []ConfigEnvironmentAwsEcsService
+}
+
+type ConfigEnvironmentAwsEcsService struct {
+	Name string
+	Ecr  string
+}
 
 func GetTag() string {
 	return getString("tag", "", "")
@@ -16,6 +43,10 @@ func GetTaxPrefix() string {
 
 func GetEnvironment() string {
 	return getString("environment", "", "")
+}
+
+func GetDefaultEnvironment() string {
+	return getString("default-environment", "default-environment", "")
 }
 
 func GetAwsRegion() string {
@@ -40,6 +71,38 @@ func GetDockerServices() []string {
 
 func GetS3Bucket() string {
 	return getString("s3-bucket", "", "")
+}
+
+func GetCurrentEnvironment() (*ConfigEnvironment, error) {
+	environmentName := GetEnvironment()
+
+	if environmentName == "" {
+		cliio.LogVerbose("No environment name, using default environment")
+		environmentName = GetDefaultEnvironment()
+	}
+
+	return GetNamedEnvironment(environmentName)
+}
+
+func GetNamedEnvironment(environmentName string) (*ConfigEnvironment, error) {
+	v := viper.GetViper()
+	environments := v.Get("environments")
+
+	// Loop through environments
+	for _, environment := range environments.([]interface{}) {
+		var env ConfigEnvironment
+		err := mapstructure.Decode(environment, &env)
+		if err != nil {
+			cliio.LogVerbosef("Failed to decode environment file. %s", err.Error())
+			os.Exit(1)
+		}
+
+		if env.Name == environmentName {
+			return &env, nil
+		}
+	}
+
+	return nil, fmt.Errorf("environment [%s] not found", environmentName)
 }
 
 func getString(flag string, filePath string, defaultValue string) string {
