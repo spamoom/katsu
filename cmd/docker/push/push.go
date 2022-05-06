@@ -122,7 +122,7 @@ func callPush(context CallPushContext) bool {
 			cliio.ErrorStepf("Unable to push tag %s for service %s, check the above output for reasons why.", tag, context.Service)
 			return false
 		} else {
-			cliio.SuccessfulStepf("Pushed %s image with %s tag", context.Service, tag)
+			cliio.SuccessfulStepf("Pushed %s image with tag: %s", context.Service, tag)
 		}
 	}
 

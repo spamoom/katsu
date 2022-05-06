@@ -62,7 +62,7 @@ func TagImages(newTags []string, service *string) bool {
 				continue
 			}
 
-			cliio.Stepf("Tagging %s:%s to %s:%s", serviceUrl, sourceTag, serviceUrl, tag)
+			cliio.WarnStepf("Tagging %s:%s to %s:%s", serviceUrl, sourceTag, serviceUrl, tag)
 
 			parts := []string{
 				"tag",
@@ -91,8 +91,6 @@ func BuildRepoUrlForService(service string) string {
 	if err != nil {
 		cliio.FatalStepf("Unable to get environment, please ensure it is setup in .katsu.yml")
 	}
-
-	fmt.Println(service)
 
 	return fmt.Sprintf("%d.dkr.ecr.%s.amazonaws.com/%s", environment.Aws.AccountId, environment.Aws.Region, environment.Aws.Ecs.Services[0].Ecr)
 }

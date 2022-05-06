@@ -37,7 +37,7 @@ func WarnStep(text string) {
 	step(text, color.FgYellow)
 }
 
-func WarStepf(format string, a ...interface{}) {
+func WarnStepf(format string, a ...interface{}) {
 	WarnStep(fmt.Sprintf(format, a...))
 }
 
